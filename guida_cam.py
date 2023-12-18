@@ -8,13 +8,17 @@ Created on Sat Dec 16 10:50:26 2023
 import cv2
 import mediapipe as mp
 import math
+from filterpy.kalman import KalmanFilter
+import numpy as np
+
+
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(
     static_image_mode=False,
     max_num_hands=2,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
+    min_detection_confidence=0.2,
+    min_tracking_confidence=0.02
 )
 
 cap = cv2.VideoCapture(0)
@@ -25,6 +29,10 @@ while cap.isOpened():
         break
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+
+    frame_rgb = cv2.GaussianBlur(frame_rgb, (5, 5), 0)
+    
     results = hands.process(frame_rgb)
 
     left_hand_status = "Unknown"
@@ -37,7 +45,7 @@ while cap.isOpened():
     if results.multi_hand_landmarks:
         for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
             hand_landmarks = hand_landmarks.landmark
-
+            
             thumb_tip = hand_landmarks[mp_hands.HandLandmark.THUMB_TIP]
             index_tip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
             middle_tip = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
@@ -106,4 +114,5 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+
 

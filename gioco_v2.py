@@ -23,10 +23,10 @@ clock = pygame.time.Clock()
 car_image = pygame.image.load("boattt.png").convert_alpha()
 original_car_width, original_car_height = car_image.get_size()
 car_width, car_height = 300, 200  # Nuove dimensioni della barca
-car_image = pygame.transform.scale(car_image, (car_width, car_height))
-car_image = pygame.transform.flip(car_image, True, False)
-car_image = pygame.transform.scale(car_image, (car_width, car_height))
-car_mask = pygame.mask.from_surface(car_image)
+car_image = pygame.transform.scale(car_image, (car_width, car_height)) #regola grandezza barca
+car_image = pygame.transform.flip(car_image, True, False) #trasla la barca per visualizzarla al dritto
+
+#car_mask = pygame.mask.from_surface(car_image)
 # Posizione iniziale della barca
 car_image_x = 0
 car_image_y = (screen_height - car_height) // 2
@@ -43,12 +43,12 @@ obstacle_images = [pygame.image.load("barrel.png").convert_alpha(),
 # Asset sulla destra
 obstacles = []
 obstacle_width, obstacle_height = 50, 60
-obstacle_images[0] = pygame.transform.scale(obstacle_images[0], (obstacle_width, obstacle_height))
+obstacle_images[0] = pygame.transform.scale(obstacle_images[0], (obstacle_width, obstacle_height)) #regola grandezza ostacolo
 obstacle_speed = 10
 coin_image = pygame.image.load("coin.png").convert_alpha()
 coins = []
 coin_width, coin_height = 50, 60
-coin_image = pygame.transform.scale(coin_image, (coin_width, coin_height))
+coin_image = pygame.transform.scale(coin_image, (coin_width, coin_height)) # regola grandezza soldo
 coin_speed = 10
 # Font per il testo "Game Over"
 game_over_font = pygame.font.Font(None, 100)
@@ -72,16 +72,16 @@ start_time = pygame.time.get_ticks()  # Ottieni il tempo di inizio in millisecon
 distanza_percorsa = 0
 
 def check_collision(rect1, rect2):
-    return rect1.colliderect(rect2)
+    return rect1.colliderect(rect2)  #vede se le due immagini si sovrappongono (collidono)
 # Funzione per visualizzare il testo "Game Over"
 def show_game_over_text():
-    game_over_text = game_over_font.render("Game Over", True, (255, 0, 0))
-    screen.blit(game_over_text, (screen_width // 2 - 200, screen_height // 2 - 50))
-    pygame.display.flip()
+    game_over_text = game_over_font.render("Game Over", True, (255, 0, 0)) 
+    screen.blit(game_over_text, (screen_width // 2 - 200, screen_height // 2 - 50)) #mostra la scritta game over
+    pygame.display.flip() #aggiorna il display del gioco per ricaricare tutta la grafica
     pygame.time.wait(2000)  # Attendere 2 secondi
     reset_game()
 
-# Funzione per reimpostare la posizione della nave e degli asset
+# Funzione per reimpostare la posizione della nave e degli asset e tutti gli altri parametri
 def reset_game():
     global car_image_x, car_image_y, obstacles, coins, bullets, obstacle_spawn_prob, coin_spawn_prob, distanza_percorsa, punteggio_monete
     car_image_x = 0
@@ -93,15 +93,15 @@ def reset_game():
     coin_spawn_prob = 0.005
     distanza_percorsa = 0
     punteggio_monete = 0
-# Impostazioni della mano
+# Impostazioni della mano, TODO: provare a fare fine-tuning sugli ultimi due parametri
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(
     static_image_mode=False,
     max_num_hands=2,
-    min_detection_confidence=0.2,
-    min_tracking_confidence=0.02
+    min_detection_confidence=0.2, #threshold di rilevamento mani
+    min_tracking_confidence=0.02 #threshold di tracking del mani in movimento
 )
-
+#avvia telecamera
 cap = cv2.VideoCapture(0)
 # Aggiorna la direzione di sterzata
 steering_threshold_lower = -10
@@ -111,8 +111,8 @@ while cap.isOpened():
     if not ret:
         break
 
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame_rgb = cv2.GaussianBlur(frame_rgb, (5, 5), 0)
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #converti frame in immagine a colori
+    frame_rgb = cv2.GaussianBlur(frame_rgb, (5, 5), 0) #applica filtro per aiutare il rilevamento delle mani
 
     results = hands.process(frame_rgb)
 
@@ -128,24 +128,25 @@ while cap.isOpened():
         for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
             hand_landmarks = hand_landmarks.landmark
             
-            thumb_tip = hand_landmarks[mp_hands.HandLandmark.THUMB_TIP]
-            index_tip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-            middle_tip = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+            thumb_tip = hand_landmarks[mp_hands.HandLandmark.THUMB_TIP]  #calcola coordinate della giuntura tip (estremità) del pollice
+            index_tip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP] # ripeti per indice
+            middle_tip = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP] #ecc...
             ring_tip = hand_landmarks[mp_hands.HandLandmark.RING_FINGER_TIP]
             pinky_tip = hand_landmarks[mp_hands.HandLandmark.PINKY_TIP]
 
-            thumb_mcp = hand_landmarks[mp_hands.HandLandmark.THUMB_MCP]
-            index_mcp = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP]
-            middle_mcp = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+            thumb_mcp = hand_landmarks[mp_hands.HandLandmark.THUMB_MCP] #calcola coordinate della giuntura mcp (base) del pollice
+            index_mcp = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP] # ripeti per indice
+            middle_mcp = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP] # ecc...
             ring_mcp = hand_landmarks[mp_hands.HandLandmark.RING_FINGER_MCP]
             pinky_mcp = hand_landmarks[mp_hands.HandLandmark.PINKY_MCP]
 
-            index_pip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP]
+            index_pip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_PIP] #calcola coordinate della giuntura pip (intermedia) dell'indice
 
             # Definisci la distanza soglia tra i tip delle dita e i rispettivi MCP
             threshold_distance_tip_mcp = 0.8
-            threshold_distance_pip_thumb_tip = 0.1
-
+            threshold_distance_pip_thumb_tip = 0.1 # Definisci la distanza soglia tra pip dell'indice tip del pollice
+            # valuta mano chiusa sulle distanze tra i tip e i relativi mcp di ogni dito e sulla distanza tra tip del pollice e pip dell'indice
+            # si usa distanza euclidea per le posizioni delle coordinate x e y delle giunture e la si confronta con la threshold
             hand_closed = (
                 ((thumb_tip.x - thumb_mcp.x)**2 + (thumb_tip.y - thumb_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
                 ((index_tip.x - index_mcp.x)**2 + (index_tip.y - index_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
@@ -155,8 +156,8 @@ while cap.isOpened():
                 ((index_pip.x - thumb_tip.x)**2 + (index_pip.y - thumb_tip.y)**2)**0.5 < threshold_distance_pip_thumb_tip
             )
 
-            # Determina se la mano è la sinistra o la destra in base alla posizione del pollice
-            if thumb_tip.x < index_tip.x:
+            # Asegna lo stato alla mano sinistra o destra in base alla posizione del pollice rispetto all'indice, TODO: forse è una causa dei bug: pensare ad un altro criterio
+            if thumb_tip.x < index_tip.x: #controlla se la posizione del pollice è avanti o indietro all'indice della stessa mano
                 left_hand_status = "Closed" if hand_closed else "Open"
                 thumb2 = (int(thumb_tip.x * frame.shape[1]), int(thumb_tip.y * frame.shape[0]))
             else:
@@ -171,9 +172,9 @@ while cap.isOpened():
             # Disegna un asse tra i due pollici
             cv2.line(frame, thumb1, thumb2, (0, 255, 0), 2)
 
-
+            #mostra a schermo l'angolo
             cv2.putText(frame, f"Line Angle: {line_angle:.2f}", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
+            #determina la direzione di sterzata sulla base dell'angolo trovato
             if steering_threshold_lower < line_angle < steering_threshold_upper:
                 steering_direction = "Straight"
             elif line_angle >= steering_threshold_upper:
@@ -188,7 +189,7 @@ while cap.isOpened():
     cv2.putText(frame, f"Steering Direction: {steering_direction}", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     cv2.imshow('Hand Tracking', frame)
-
+    #IMPORTANTE: quì inizia la parte di gioco
     # Aggiorna la posizione della barca lungo l'asse y in base all'inclinazione della linea
     speed = 25  # Regola la velocità di spostamento
     quantità_mov = 5
@@ -337,4 +338,5 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+
 

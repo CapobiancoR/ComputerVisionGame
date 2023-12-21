@@ -11,6 +11,7 @@ import mediapipe as mp
 import math
 import random
 import time
+import numpy as np
 pygame.init()
 
 # Impostazioni del gioco
@@ -69,6 +70,7 @@ coin_spawn_interval = 5  # Intervallo di tempo per aumentare la probabilità (in
 coin_last_spawn_time = time.time()
 start_time = pygame.time.get_ticks()  # Ottieni il tempo di inizio in millisecondi
 distanza_percorsa = 0
+
 def check_collision(rect1, rect2):
     return rect1.colliderect(rect2)
 # Funzione per visualizzare il testo "Game Over"
@@ -111,6 +113,7 @@ while cap.isOpened():
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_rgb = cv2.GaussianBlur(frame_rgb, (5, 5), 0)
+
     results = hands.process(frame_rgb)
 
     # ... Resto del codice di rilevamento delle mani ...
@@ -281,9 +284,9 @@ while cap.isOpened():
             coins.remove(coin)  # Rimuovi la moneta dalla lista
     for bullet in bullets:
         bullet['x'] += bullet_speed
-        pygame.draw.circle(screen, (0, 0, 0), (int(bullet['x']), int(bullet['y'])), 10)  # Crea una pallina nera
+        bullet_radius = 18
+        pygame.draw.circle(screen, (0, 0, 0), (int(bullet['x']), int(bullet['y'])), bullet_radius)  # Crea una pallina nera
         # Verifica collisione con ostacoli
-        bullet_radius = 10
         bullet_rect = pygame.Rect(bullet['x'], bullet['y'], bullet_radius, bullet_radius)
         for obstacle in obstacles:
             obstacle_rect = pygame.Rect(obstacle['x'], obstacle['y'], obstacle_width, obstacle_height)

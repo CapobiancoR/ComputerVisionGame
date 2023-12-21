@@ -134,7 +134,7 @@ while cap.isOpened():
     if results.multi_hand_landmarks:
         for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
             hand_landmarks = hand_landmarks.landmark
-            
+            wrist = hand_landmarks[mp_hands.HandLandmark.WRIST]
             thumb_tip = hand_landmarks[mp_hands.HandLandmark.THUMB_TIP]  #calcola coordinate della giuntura tip (estremità) del pollice
             index_tip = hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP] # ripeti per indice
             middle_tip = hand_landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP] #ecc...
@@ -157,13 +157,13 @@ while cap.isOpened():
             threshold_distance_thumb_tip_index_tip = 0.2  # Puoi regolare questo valore in base alle tue esigenze
 
             threshold_vertical_alignment = 0.1  # Puoi regolare questo valore in base alle tue esigenze
-
+            threshold = 0.4
             hand_open = (
-    # Verifica distanza tra tip e MCP per indice, medio, anulare e mignolo
-    ((index_tip.y - index_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
-    ((middle_tip.y - middle_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
-    ((ring_tip.y - ring_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
-    ((pinky_tip.y - pinky_mcp.y)**2)**0.5 < threshold_distance_tip_mcp and
+                abs(abs(thumb_mcp.y - wrist.y) - abs(thumb_mcp.y - thumb_tip.y)) < threshold and
+                abs(abs(index_mcp.y - wrist.y) - abs(index_mcp.y - index_tip.y)) < threshold and
+                abs(abs(middle_mcp.y - wrist.y) - abs(middle_mcp.y - middle_tip.y)) < threshold and
+                abs(abs(ring_mcp.y - wrist.y) - abs(ring_mcp.y - ring_tip.y)) < threshold and
+                abs(abs(pinky_mcp.y - wrist.y) - abs(pinky_mcp.y - pinky_tip.y)) < threshold and
 
     # Verifica che il tip del pollice sia alla stessa altezza di MCP delle altre dita
     abs(thumb_tip.y - index_mcp.y) < threshold_vertical_alignment and
@@ -176,10 +176,10 @@ while cap.isOpened():
             # Assegna lo stato alla mano sinistra o destra in base alla posizione del pollice rispetto all'indice, TODO: forse è una causa dei bug: pensare ad un altro criterio
             if thumb_tip.x < index_tip.x: #controlla se la posizione del pollice è avanti o indietro all'indice della stessa mano
                 left_hand_status = "Open" if hand_open else "Closed"
-                thumb2 = (int(thumb_tip.x * frame.shape[1]), int(thumb_tip.y * frame.shape[0]))
+                thumb2 = (int(index_mcp.x * frame.shape[1]), int(index_mcp.y * frame.shape[0]))
             else:
                 right_hand_status = "Open" if hand_open else "Closed"
-                thumb1 = (int(thumb_tip.x * frame.shape[1]), int(thumb_tip.y * frame.shape[0]))
+                thumb1 = (int(index_mcp.x * frame.shape[1]), int(index_mcp.y * frame.shape[0]))
 
         if thumb1 and thumb2 and left_hand_status == "Closed" and right_hand_status == "Closed":
             # Calcola l'inclinazione rispetto al punto centrale della linea
@@ -355,4 +355,5 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+
 

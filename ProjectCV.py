@@ -122,8 +122,8 @@ while cap.isOpened():
     results = hands.process(frame_rgb)
 
     # ... Resto del codice di rilevamento delle mani ...
-    left_hand_status = "Closed"
-    right_hand_status = "Closed"
+    left_hand_status = "Unknown"
+    right_hand_status = "Unknown"
     steering_direction = "Straight"
     line_angle = 0.0
 
@@ -183,17 +183,19 @@ while cap.isOpened():
                         left_hand_status="Open"
                         left_hand_tips     = hand_tips
                         left_hand_bottoms  = hand_bottom
-                        #thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                        thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
                     else:
                         right_hand_status="Open"
                         right_hand_tips     = hand_tips
                         right_hand_bottoms  = hand_bottom
-                        #thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
-
-            if hand_tips[0].x < hand_bottom[1].x:
-                thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
-            else:
-                thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                        thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+            else :            
+                if hand_tips[0].x < hand_bottom[1].x:
+                    left_hand_status="Closed"
+                    thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                else:
+                    thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                    right_hand_status="Closed"
 
 
         # INIZIO CODICE PER STERZO (NON FUNZIONANTE !!!!!!!!!!!!)

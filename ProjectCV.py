@@ -95,15 +95,15 @@ hands = mp_hands.Hands(
     min_detection_confidence=0.2, #threshold di rilevamento mani
     min_tracking_confidence=0.02 #threshold di tracking del mani in movimento
 )
-#avvia telecamera
+#avvia telecamera SE NE HAI UNA ESTERNA USA QUELLA ALTRIMENTI QUELLA PREDEFINITA
 try:
     cap = cv2.VideoCapture(1)
 except:
     cap = cv2.VideoCapture(0)
 
 # Aggiorna la direzione di sterzata
-steering_threshold_lower = -10
-steering_threshold_upper = 10
+steering_threshold_lower = -5
+steering_threshold_upper = 5
 
 
 
@@ -183,12 +183,17 @@ while cap.isOpened():
                         left_hand_status="Open"
                         left_hand_tips     = hand_tips
                         left_hand_bottoms  = hand_bottom
-                        thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                        #thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
                     else:
                         right_hand_status="Open"
                         right_hand_tips     = hand_tips
                         right_hand_bottoms  = hand_bottom
-                        thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+                        #thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+
+            if hand_tips[0].x < hand_bottom[1].x:
+                thumb2= (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
+            else:
+                thumb1  = (int(hand_bottom[1].x * frame.shape[1]), int(hand_bottom[1].y * frame.shape[0]))
 
 
         # INIZIO CODICE PER STERZO (NON FUNZIONANTE !!!!!!!!!!!!)

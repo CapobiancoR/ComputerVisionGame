@@ -5,6 +5,7 @@ import math
 import random
 import time
 import numpy as np
+import sys
 pygame.init()
 
 # Impostazioni del gioco
@@ -127,10 +128,8 @@ steering_threshold_upper = 10
 
 
 
-
-
-
 while cap.isOpened():
+    
     clock.tick(30)  # Imposta il numero di fotogrammi al secondo desiderato
     ret, frame = cap.read()
     if not ret:
@@ -140,6 +139,10 @@ while cap.isOpened():
     frame_rgb = cv2.GaussianBlur(frame_rgb, (5, 5), 0) #applica filtro per aiutare il rilevamento delle mani
 
     results = hands.process(frame_rgb)
+    # Sovrapponi il frame della telecamera sulla finestra del gioco
+
+
+
 
     # ... Resto del codice di rilevamento delle mani ...
     left_hand_status = "Unknown"
@@ -446,11 +449,11 @@ while cap.isOpened():
     screen.blit(vite_text, (10, 100))
     pygame.display.flip()    
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT  or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             cap.release()
             cv2.destroyAllWindows()
             pygame.quit()
-            quit()
+            #quit()
     
     
     if cv2.waitKey(1) & 0xFF == 27:

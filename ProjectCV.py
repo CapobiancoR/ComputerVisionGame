@@ -6,10 +6,13 @@ import random
 import time
 import numpy as np
 import sys
+import pyautogui
+import keyboard
 pygame.init()
 
 # Impostazioni del gioco
-screen_width, screen_height = 1920, 1080
+screen_width = int(input("Inserisci la larghezza dello schermo (consigliato 1920): "))
+screen_height = int(input("Inserisci l'altezza dello schermo (consigliato 1080): "))
 screen = pygame.display.set_mode((screen_width, screen_height))
 clock = pygame.time.Clock()
 
@@ -17,7 +20,10 @@ clock = pygame.time.Clock()
 # Carica l'asset del gioco
 car_image = pygame.image.load("boattt.png").convert_alpha()
 original_car_width, original_car_height = car_image.get_size()
-car_width, car_height = 300, 200  # Nuove dimensioni della barca
+car_width_percentage = 0.15
+car_height_percentage = 0.2
+car_width = int(screen_width * car_width_percentage)
+car_height = int(screen_height * car_height_percentage)
 car_image = pygame.transform.scale(car_image, (car_width, car_height)) #regola grandezza barca
 car_image = pygame.transform.flip(car_image, True, False) #trasla la barca per visualizzarla al dritto
 
@@ -26,29 +32,39 @@ car_image = pygame.transform.flip(car_image, True, False) #trasla la barca per v
 car_image_x = 0
 car_image_y = (screen_height - car_height) // 2
 # Carica l'immagine di sfondo
+
+
 background1 = pygame.image.load("watertex.jpg")
 background2 = pygame.transform.flip(background1, True, False)
+
 background_width, background_height = background1.get_size()
 overlap = 0  # Lunghezza della zona di sovrapposizione
 # Posizioni iniziali delle due copie dell'immagine di sfondo
 
 
 background1_x, background2_x = 0, background_width
-
+obstacle_width_percentage = 0.035
+obstacle_height_percentage = 0.065
+coin_width_percentage = 0.03
+coin_height_percentage = 0.06
+cuore_width_percentage = 0.03
+cuore_height_percentage = 0.055
 # Carica le immagini degli ostacoli con le relative maschere di collisione
 obstacle_images = [pygame.image.load("barrel.png").convert_alpha(),
     # Aggiungi altre immagini degli ostacoli con le relative maschere...
     ]
 # Asset sulla destra
 obstacles = []
-obstacle_width, obstacle_height = 50, 60
+obstacle_width = int(screen_width * obstacle_width_percentage)
+obstacle_height = int(screen_height * obstacle_height_percentage)
 obstacle_images[0] = pygame.transform.scale(obstacle_images[0], (obstacle_width, obstacle_height)) #regola grandezza ostacolo
-obstacle_speed = 10
+obstacle_speed = 0.007 * screen_width
 coin_image = pygame.image.load("coin.png").convert_alpha()
 coins = []
-coin_width, coin_height = 50, 60
+coin_width = int(screen_width * coin_width_percentage)
+coin_height = int(screen_height * coin_height_percentage)
 coin_image = pygame.transform.scale(coin_image, (coin_width, coin_height)) # regola grandezza soldo
-coin_speed = 10
+coin_speed = 0.007 * screen_width
 # Font per il testo "Game Over"
 game_over_font = pygame.font.Font(None, 100)
 
@@ -57,7 +73,7 @@ bullet_y = car_image_y + car_height // 2  # Posizione iniziale della pallina
 
 # Dichiarazione delle variabili
 bullets = []  # Lista delle palline
-bullet_speed = 20  # Velocità di spostamento delle palline
+bullet_speed = 0.014 * screen_width  # Velocità di spostamento delle palline
 last_shot_time = time.time()
 shoot_cooldown = 0.75  # Tempo in secondi tra uno sparo e l'altro
 obstacle_spawn_prob = 0.01  # Probabilità iniziale di spawn
@@ -73,7 +89,8 @@ distanza_percorsa = 0
 vite = 3
 cuori = []
 cuore_image = pygame.image.load("cuore.png").convert_alpha()
-cuore_width, cuore_height = 50, 50  # Regola le dimensioni del cuore a tuo piacimento
+cuore_width = int(screen_width * cuore_width_percentage)
+cuore_height = int(screen_height * cuore_height_percentage)
 cuore_image = pygame.transform.scale(cuore_image, (cuore_width, cuore_height))
 cuore_spawn_prob = 0.001  # Probabilità iniziale di spawn
 cuore_spawn_interval = 5  # Intervallo di tempo per aumentare la probabilità (in secondi)
@@ -221,11 +238,11 @@ while cap.isOpened():
                     right_hand_status="Closed"
 
 
-        # INIZIO CODICE PER STERZO (NON FUNZIONANTE !!!!!!!!!!!!)
+       #codice sterzo
 
         try:
             if(left_hand_status == "Closed" and right_hand_status=="Closed"):
-                center_point = ((thumb1[0] + thumb2[0]) // 2, (thumb1[1] + thumb2[1]) // 2)
+                #center_point = ((thumb1[0] + thumb2[0]) // 2, (thumb1[1] + thumb2[1]) // 2)
                 line_angle = math.degrees(math.atan2(thumb2[1] - thumb1[1], thumb2[0] - thumb1[0]))
 
             # Disegna un asse tra i due pollici
@@ -245,17 +262,21 @@ while cap.isOpened():
 
         
 
-
+    frame_width = int(screen_width * 0.3)
+    frame_height = int(screen_height * 0.35)
     # Aggiungi la scritta sullo stato della mano sopra il frame
+
+    # Disegna i testi ridimensionati sul frame
     cv2.putText(frame, f"Left Hand Status: {left_hand_status}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(frame, f"Right Hand Status: {right_hand_status}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(frame, f"Steering Direction: {steering_direction}", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+    frame = cv2.resize(frame, (frame_width, frame_height))
     cv2.imshow('Hand Tracking', frame)
 
     #IMPORTANTE: quì inizia la parte di gioco
     # Aggiorna la posizione della barca lungo l'asse y in base all'inclinazione della linea
-    speed = 25  # Regola la velocità di spostamento
+    speed = 0.015 * screen_width  # Regola la velocità di spostamento
 
     if steering_threshold_lower < line_angle < steering_threshold_upper:
         delta_y = 0
@@ -272,7 +293,7 @@ while cap.isOpened():
     #screen.fill((255, 255, 255))  # Sfondo bianco
     
     
-    speed=10
+    speed=0.007 * screen_width
     # Sposta le immagini in orizzontale
     background1_x -= speed
     background2_x -= speed
@@ -309,7 +330,7 @@ while cap.isOpened():
     time_since_last_spawn_coin = current_time - coin_last_spawn_time
     time_since_last_spawn_cuore = current_time - cuore_last_spawn_time
     # Aggiorna la lista degli ostacoli
-    cuore_speed = 10
+    cuore_speed = 0.007 * screen_width
     for cuore in cuori:
         cuore['x'] -= cuore_speed
     # Rimuovi gli ostacoli che sono usciti dallo schermo
@@ -392,7 +413,10 @@ while cap.isOpened():
            cuori.remove(cuore)  # Rimuovi il cuore dalla lista
     for bullet in bullets:
         bullet['x'] += bullet_speed
-        bullet_radius = 18
+        bullet_radius_percentage = 0.011  # Puoi modificare questo valore in base alle tue esigenze
+
+        # Calcola il raggio della pallina in base alla percentuale della larghezza della finestra
+        bullet_radius = int(screen_width * bullet_radius_percentage)
         pygame.draw.circle(screen, (0, 0, 0), (int(bullet['x']), int(bullet['y'])), bullet_radius)  # Crea una pallina nera
         # Verifica collisione con ostacoli
         bullet_rect = pygame.Rect(bullet['x'], bullet['y'], bullet_radius, bullet_radius)
@@ -456,7 +480,8 @@ while cap.isOpened():
             #quit()
     
     
-    if cv2.waitKey(1) & 0xFF == 27:
+    if keyboard.is_pressed('esc'):
+        pygame.quit()
         break
 
 cap.release()

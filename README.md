@@ -1,9 +1,3 @@
-Perfetto ✅
-Ecco **un unico file completo**, pronto da copiare e incollare direttamente nel tuo `README.md` su GitHub:
-
----
-
-````markdown
 # 🏴‍☠️ Pirate of the Sea – Hand Gesture Recognition Game
 
 A Computer Vision project developed as part of the **Computer Vision** course at *Sapienza University of Rome (2023/2024)*  

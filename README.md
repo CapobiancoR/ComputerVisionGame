@@ -168,8 +168,7 @@ This hybrid approach achieves **interpretable and efficient gesture recognition*
 
 ## 👥 Authors & Contributions
 
-* **Riccardo Capobianco** – *System architect & inventor of the disequation-based gesture recognition logic*
-* **Alessio Buccarella** – *MediaPipe integration and computer vision pipeline*
+* **Riccardo Capobianco** – *System architect & inventor of the disequation-based gesture recognition logic, MediaPipe integration/ CV pipeline*
 * **Giorgio Scavalli Veccia** – *Game mechanics, UX, and performance optimization*
 
 ---

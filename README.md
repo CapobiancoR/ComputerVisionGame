@@ -174,22 +174,9 @@ This hybrid approach achieves **interpretable and efficient gesture recognition*
 
 ---
 
-## 🎮 Demo
-
-*(Insert GIF or YouTube demo link here)*
-
----
-
-## 📄 License
-
-This project is released under the **MIT License**.
-
----
-
 > “A pirate controls his ship not with a wheel, but with motion and logic.” ⚓
 > — *Pirate of the Sea, 2024*
 
-```
 
 ---
 
